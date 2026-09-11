@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JM-HRIS</title>
+
+<!-- ✅ BARU: PWA manifest + icon, supaya browser menawarkan tombol
+     "Install" / "Add to Home screen" -- ini yang membuat JM-HRIS bisa
+     punya ikon asli di desktop/HP, bukan sekadar bookmark biasa. -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="theme-color" content="#2f4373">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="JM-HRIS">
+
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: #0a0e1a;
+  }
+  iframe {
+    width: 100%;
+    height: 100vh;
+    border: none;
+    display: block;
+  }
+</style>
+</head>
+<body>
+
+  <!--
+    ============================================================
+    CARA PAKAI:
+    1. Ganti URL di bawah ini (GANTI_DENGAN_URL_WEB_APP_ANDA)
+       dengan URL Web App hasil Deploy dari Apps Script Editor
+       (yang diakhiri /exec).
+    2. Upload file HTML ini ke hosting APA SAJA yang bisa
+       menyajikan file statis, misalnya:
+         - GitHub Pages (gratis)
+         - Google Sites (gratis, tinggal embed HTML)
+         - Firebase Hosting (gratis)
+         - hosting website perusahaan Anda sendiri
+    3. Bagikan URL dari hosting BARU tersebut ke tim Anda,
+       BUKAN lagi URL script.google.com yang lama.
+    4. Karena orang membuka domain Anda sendiri (bukan
+       script.google.com secara langsung), notifikasi
+       "Aplikasi ini dibuat oleh pengguna Google Apps Script"
+       tidak akan muncul.
+
+    CATATAN: Ini murni soal cara MEMBUKA aplikasinya (via
+    domain sendiri, bukan langsung ke script.google.com).
+    Semua logika, keamanan, dan data aplikasi tetap 100%
+    berjalan di Google Apps Script seperti biasa -- halaman
+    ini hanya "jendela" untuk mengaksesnya.
+    ============================================================
+  -->
+
+  <iframe
+    src="https://script.google.com/macros/s/AKfycbzAXO5WGL0I-bMsc3WDORoNXCbYxVIRVQ7RFbwwvuUJkM6hDu0BYc8ggroyLj55_1Fv3g/exec"
+    title="JM-HRIS"
+    allow="clipboard-write"
+  ></iframe>
+
+  <!-- ✅ BARU: tombol "Install ke Desktop" yang muncul otomatis
+       kalau browser mendukung (Chrome, Edge, dan sebagian besar
+       browser Android). Kalau browser tidak mendukung prompt ini
+       (mis. Safari/iOS), gunakan menu bawaan browser: "Add to Home Screen". -->
+  <button id="btnInstall" style="
+    display:none;
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    padding:12px 20px;
+    background:linear-gradient(135deg,#2f4373,#c9a44c);
+    color:#fff;
+    border:none;
+    border-radius:12px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    box-shadow:0 8px 24px rgba(0,0,0,.35);
+    z-index:9999;
+  ">⬇ Install JM-HRIS ke Desktop</button>
+
+  <script>
+    // Daftarkan service worker (syarat teknis installability)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(function(e){
+        console.warn('Service worker gagal didaftarkan:', e);
+      });
+    }
+
+    // Tangkap event install PWA dari browser, tampilkan tombol kita sendiri
+    let deferredInstallPrompt = null;
+    const btnInstall = document.getElementById('btnInstall');
+
+    window.addEventListener('beforeinstallprompt', function(e){
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      btnInstall.style.display = 'block';
+    });
+
+    btnInstall.addEventListener('click', async function(){
+      if (!deferredInstallPrompt) return;
+      btnInstall.style.display = 'none';
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+    });
+
+    window.addEventListener('appinstalled', function(){
+      btnInstall.style.display = 'none';
+    });
+  </script>
+
+</body>
+</html>
